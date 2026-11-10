@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.hassan.cfg2pda.controller.MainController">
+    <top>
+        <ToolBar>
+            <Button text="Convert CFG → PDA" onAction="#onConvert"/>
+            <Separator orientation="VERTICAL"/>
+            <Label text="Test String:"/>
+            <TextField fx:id="testStringField" prefWidth="200"/>
+            <Button text="Simulate" onAction="#onSimulate"/>
+            <Separator orientation="VERTICAL"/>
+            <Button text="Export PDA JSON" onAction="#onExportJson"/>
+        </ToolBar>
+    </top>
+
+    <center>
+        <SplitPane dividerPositions="0.45">
+            <VBox spacing="8">
+                <padding>
+                    <Insets top="10" right="10" bottom="10" left="10"/>
+                </padding>
+                <Label text="CFG Input"/>
+                <TextArea fx:id="cfgInputArea" wrapText="true" prefRowCount="20"/>
+                <TitledPane text="Notes" expanded="false">
+                    <content>
+                        <Label wrapText="true" text="Format:
+S -> aA | b
+A -> aAa | ε
+
+- Uppercase = Nonterminals, lowercase = terminals
+- ε or epsilon for empty
+- One production per line."/>
+                    </content>
+                </TitledPane>
+            </VBox>
+
+            <VBox spacing="8">
+                <padding>
+                    <Insets top="10" right="10" bottom="10" left="10"/>
+                </padding>
+                <Label text="Generated PDA Transitions"/>
+                <TableView fx:id="transitionTable" prefHeight="300">
+                    <columns>
+                        <TableColumn text="From State" fx:id="colFrom"/>
+                        <TableColumn text="Input" fx:id="colInput"/>
+                        <TableColumn text="Pop" fx:id="colPop"/>
+                        <TableColumn text="Push" fx:id="colPush"/>
+                        <TableColumn text="To State" fx:id="colTo"/>
+                    </columns>
+                </TableView>
+
+                <Label text="Simulation Steps"/>
+                <TableView fx:id="simStepsTable" prefHeight="220">
+                    <columns>
+                        <TableColumn text="Step" fx:id="colStep"/>
+                        <TableColumn text="State" fx:id="colSimState"/>
+                        <TableColumn text="Remaining Input" fx:id="colSimInput"/>
+                        <TableColumn text="Stack" fx:id="colSimStack"/>
+                        <TableColumn text="Applied Transition" fx:id="colSimTrans"/>
+                    </columns>
+                </TableView>
+
+                <Label fx:id="statusLabel" styleClass="status-label"/>
+            </VBox>
+        </SplitPane>
+    </center>
+</BorderPane>
