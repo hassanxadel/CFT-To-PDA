@@ -12,7 +12,7 @@ public class ConverterTest {
         var cfg = new CFGParser().parse(g);
         var pda = new CFGToPDAConverter().convert(cfg);
         assertTrue(pda.getTransitions().size() >= 1);
-        assertEquals("q", pda.getStartState());
+        assertEquals("q0", pda.getStartState());
         assertEquals("q_accept", pda.getAcceptState());
     }
 }
