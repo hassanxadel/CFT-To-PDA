@@ -8,13 +8,20 @@ public class CFGToPDAConverter {
 
     public PDA convert(CFG cfg) {
         PDA pda = new PDA();
+        // q0 has no incoming transitions, so the init step below can only ever
+        // fire once. Without this separation the init transition is just another
+        // (q, eps, $) rule, and the simulator can "replay" it whenever the stack
+        // bottoms out mid-string, wrongly accepting concatenations of substrings
+        // that are each individually in the language (e.g. "aa" as "a" + "a").
+        String q0 = "q0";
         String q = "q";
         String qAcc = "q_accept";
         String bottom = "$";
 
+        pda.addState(q0);
         pda.addState(q);
         pda.addState(qAcc);
-        pda.setStartState(q);
+        pda.setStartState(q0);
         pda.setAcceptState(qAcc);
         pda.setStackBottom(bottom);
 
@@ -23,8 +30,8 @@ public class CFGToPDAConverter {
         cfg.getTerminals().forEach(pda::addStackSymbol);
         pda.addStackSymbol(bottom);
 
-        // Init: (q, ε, $) -> (q, S$) so that top is S above $
-        pda.addTransition(new PDATransition(q, PDA.EPS, bottom, cfg.getStartSymbol() + bottom, q));
+        // Init: (q0, ε, $) -> (q, S$) so that top is S above $
+        pda.addTransition(new PDATransition(q0, PDA.EPS, bottom, cfg.getStartSymbol() + bottom, q));
 
         // Productions: (q, ε, A) -> (q, α)
         cfg.getProductions().forEach(pr -> {

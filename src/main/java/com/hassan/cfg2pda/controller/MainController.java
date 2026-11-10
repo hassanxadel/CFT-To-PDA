@@ -1,5 +1,6 @@
 package com.hassan.cfg2pda.controller;
 
+import com.hassan.cfg2pda.MainApp;
 import com.hassan.cfg2pda.converter.CFGToPDAConverter;
 import com.hassan.cfg2pda.model.PDA;
 import com.hassan.cfg2pda.model.PDATransition;
@@ -13,8 +14,10 @@ import javafx.scene.control.*;
 
 public class MainController {
 
+    @FXML private Button themeToggleButton;
     @FXML private TextArea cfgInputArea;
     @FXML private TextField testStringField;
+    @FXML private Label validationBanner;
     @FXML private TableView<PDATransition> transitionTable;
     @FXML private TableColumn<PDATransition, String> colFrom, colInput, colPop, colPush, colTo;
 
@@ -41,7 +44,18 @@ public class MainController {
     }
 
     @FXML
+    public void onToggleTheme() {
+        MainApp.toggleTheme();
+        themeToggleButton.setText(MainApp.isDarkMode() ? "Switch to light theme" : "Switch to dark theme");
+    }
+
+    @FXML
     public void onConvert() {
+        hideValidationBanner();
+        if (cfgInputArea.getText().isBlank()) {
+            showValidationBanner("Enter a grammar before converting — see the notation notes below.");
+            return;
+        }
         try {
             var parser = new CFGParser();
             var cfg = parser.parse(cfgInputArea.getText());
@@ -51,35 +65,40 @@ public class MainController {
             currentPDA = converter.convert(cfg);
 
             transitionTable.getItems().setAll(currentPDA.getTransitions());
-            statusLabel.setText("Converted: " + currentPDA.getTransitions().size() + " transitions.");
+            simStepsTable.getItems().clear();
+            setStatus("Converted: " + currentPDA.getTransitions().size() + " transitions", "status-idle");
         } catch (Exception e) {
-            showError("Convert error", e.getMessage());
+            currentPDA = null;
+            showValidationBanner(e.getMessage());
+            setStatus("Conversion failed", "status-reject");
         }
     }
 
     @FXML
     public void onSimulate() {
         if (currentPDA == null) {
-            showError("Simulate", "Please convert a CFG first.");
+            showValidationBanner("Convert a grammar first, then simulate a test string.");
             return;
         }
+        hideValidationBanner();
         String s = testStringField.getText().trim();
         PDASimulator sim = new PDASimulator();
         var result = sim.run(currentPDA, s, 800);
         simStepsTable.getItems().setAll(result.steps);
-        statusLabel.setText(result.accepted ? "Accepted" : "Rejected");
+        setStatus(result.accepted ? "Accepted" : "Rejected", result.accepted ? "status-accept" : "status-reject");
     }
 
     @FXML
     public void onExportJson() {
         if (currentPDA == null) {
-            showError("Export", "Nothing to export: convert first.");
+            showValidationBanner("Nothing to export yet — convert a grammar first.");
             return;
         }
         String json = JsonUtil.toJson(currentPDA.getTransitions().stream().map(PDATransition::toString).toArray());
         TextArea ta = new TextArea(json);
         ta.setEditable(false);
         ta.setWrapText(true);
+        ta.getStyleClass().add("mono-input");
         Dialog<Void> dlg = new Dialog<>();
         dlg.setTitle("PDA JSON");
         dlg.getDialogPane().setContent(ta);
@@ -87,9 +106,20 @@ public class MainController {
         dlg.showAndWait();
     }
 
-    private void showError(String header, String msg) {
-        Alert a = new Alert(Alert.AlertType.ERROR, msg, ButtonType.OK);
-        a.setHeaderText(header);
-        a.showAndWait();
+    private void setStatus(String text, String styleClass) {
+        statusLabel.setText(text);
+        statusLabel.getStyleClass().removeAll("status-idle", "status-accept", "status-reject");
+        statusLabel.getStyleClass().add(styleClass);
+    }
+
+    private void showValidationBanner(String message) {
+        validationBanner.setText(message);
+        validationBanner.setVisible(true);
+        validationBanner.setManaged(true);
+    }
+
+    private void hideValidationBanner() {
+        validationBanner.setVisible(false);
+        validationBanner.setManaged(false);
     }
 }

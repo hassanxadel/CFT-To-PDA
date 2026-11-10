@@ -7,44 +7,51 @@
             xmlns:fx="http://javafx.com/fxml"
             fx:controller="com.hassan.cfg2pda.controller.MainController">
     <top>
-        <ToolBar>
-            <Button text="Convert CFG → PDA" onAction="#onConvert"/>
-            <Separator orientation="VERTICAL"/>
-            <Label text="Test String:"/>
-            <TextField fx:id="testStringField" prefWidth="200"/>
-            <Button text="Simulate" onAction="#onSimulate"/>
-            <Separator orientation="VERTICAL"/>
-            <Button text="Export PDA JSON" onAction="#onExportJson"/>
-        </ToolBar>
+        <VBox>
+            <HBox styleClass="app-header">
+                <VBox spacing="2">
+                    <Label text="CFG &#8594; PDA Converter" styleClass="app-title"/>
+                    <Label text="Convert a context-free grammar into an equivalent pushdown automaton, then simulate it." styleClass="app-subtitle"/>
+                </VBox>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Button fx:id="themeToggleButton" text="Switch to light theme" styleClass="theme-toggle" onAction="#onToggleTheme"/>
+            </HBox>
+            <Separator/>
+            <ToolBar styleClass="main-toolbar">
+                <Button fx:id="convertButton" text="Convert CFG &#8594; PDA" onAction="#onConvert" defaultButton="true"/>
+                <Separator orientation="VERTICAL"/>
+                <Label text="Test String:"/>
+                <TextField fx:id="testStringField" styleClass="mono-field" prefWidth="220" promptText="e.g. aabb"/>
+                <Button fx:id="simulateButton" text="Simulate" onAction="#onSimulate"/>
+                <Separator orientation="VERTICAL"/>
+                <Button fx:id="exportButton" text="Export PDA JSON" onAction="#onExportJson"/>
+            </ToolBar>
+        </VBox>
     </top>
 
     <center>
-        <SplitPane dividerPositions="0.45">
+        <SplitPane dividerPositions="0.42">
             <VBox spacing="8">
                 <padding>
-                    <Insets top="10" right="10" bottom="10" left="10"/>
+                    <Insets top="14" right="14" bottom="14" left="20"/>
                 </padding>
-                <Label text="CFG Input"/>
-                <TextArea fx:id="cfgInputArea" wrapText="true" prefRowCount="20"/>
-                <TitledPane text="Notes" expanded="false">
+                <Label text="CFG Input" styleClass="pane-heading"/>
+                <TextArea fx:id="cfgInputArea" styleClass="mono-input" wrapText="true" prefRowCount="20"
+                          promptText="S -> aA | b   (see grammar notation below)"/>
+                <Label fx:id="validationBanner" styleClass="validation-banner" visible="false" managed="false" wrapText="true"/>
+                <TitledPane text="Grammar notation" expanded="false" styleClass="notes-pane">
                     <content>
-                        <Label wrapText="true" text="Format:
-S -> aA | b
-A -> aAa | ε
-
-- Uppercase = Nonterminals, lowercase = terminals
-- ε or epsilon for empty
-- One production per line."/>
+                        <Label wrapText="true" text="S -> aA | b&#10;A -> aAa | ε&#10;&#10;- Uppercase = nonterminals, lowercase = terminals&#10;- Use ε or the word epsilon for the empty string&#10;- Separate alternative right-hand sides with |&#10;- One nonterminal's productions per line"/>
                     </content>
                 </TitledPane>
             </VBox>
 
-            <VBox spacing="8">
+            <VBox spacing="10">
                 <padding>
-                    <Insets top="10" right="10" bottom="10" left="10"/>
+                    <Insets top="14" right="20" bottom="14" left="14"/>
                 </padding>
-                <Label text="Generated PDA Transitions"/>
-                <TableView fx:id="transitionTable" prefHeight="300">
+                <Label text="Generated PDA Transitions" styleClass="pane-heading"/>
+                <TableView fx:id="transitionTable" styleClass="mono-table" prefHeight="280">
                     <columns>
                         <TableColumn text="From State" fx:id="colFrom"/>
                         <TableColumn text="Input" fx:id="colInput"/>
@@ -52,10 +59,13 @@ A -> aAa | ε
                         <TableColumn text="Push" fx:id="colPush"/>
                         <TableColumn text="To State" fx:id="colTo"/>
                     </columns>
+                    <placeholder>
+                        <Label text="Convert a grammar to see its PDA transitions here."/>
+                    </placeholder>
                 </TableView>
 
-                <Label text="Simulation Steps"/>
-                <TableView fx:id="simStepsTable" prefHeight="220">
+                <Label text="Simulation Trace" styleClass="pane-heading"/>
+                <TableView fx:id="simStepsTable" styleClass="mono-table" prefHeight="220">
                     <columns>
                         <TableColumn text="Step" fx:id="colStep"/>
                         <TableColumn text="State" fx:id="colSimState"/>
@@ -63,9 +73,14 @@ A -> aAa | ε
                         <TableColumn text="Stack" fx:id="colSimStack"/>
                         <TableColumn text="Applied Transition" fx:id="colSimTrans"/>
                     </columns>
+                    <placeholder>
+                        <Label text="Simulate a test string to see each step of the trace here."/>
+                    </placeholder>
                 </TableView>
 
-                <Label fx:id="statusLabel" styleClass="status-label"/>
+                <HBox alignment="CENTER_LEFT" spacing="10">
+                    <Label fx:id="statusLabel" styleClass="status-chip, status-idle" text="Ready"/>
+                </HBox>
             </VBox>
         </SplitPane>
     </center>

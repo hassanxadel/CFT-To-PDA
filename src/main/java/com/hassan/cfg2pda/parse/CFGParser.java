@@ -64,7 +64,7 @@ public class CFGParser {
                 StringBuilder nt = new StringBuilder();
                 nt.append(c);
                 i++;
-                while (i < rhs.length() && Character.isLetterOrDigit(rhs.charAt(i))) {
+                while (i < rhs.length() && (Character.isDigit(rhs.charAt(i)) || rhs.charAt(i) == '_')) {
                     nt.append(rhs.charAt(i));
                     i++;
                 }
